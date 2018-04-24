@@ -34,7 +34,7 @@ $ pcal
 # Usage
 ```
 Usage: pcal [+|-<#>|<#> [<#>]] [-m|--month <month>] [-y|--year <year>] [-B|--before <before>]
-          [-A|--after <after>] [-v...v|--verbose] [-h|--help|--usage]
+            [-A|--after <after>] [-v...v|--verbose] [-h|--help|--usage]
 
 Details:
         -|+<num>                Display month that is <num> months before/after the current one
