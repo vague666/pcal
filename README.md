@@ -33,9 +33,7 @@ $ pcal
 
 # Usage
 ```
-pcal (c)2018 Jari Matilainen
-
-Usage: /home/vague/bin/cal [+|-<#>|<#> [<#>]] [-m|--month <month>] [-y|--year <year>] [-B|--before <before>]
+Usage: pcal [+|-<#>|<#> [<#>]] [-m|--month <month>] [-y|--year <year>] [-B|--before <before>]
           [-A|--after <after>] [-v...v|--verbose] [-h|--help|--usage]
 
 Details:
