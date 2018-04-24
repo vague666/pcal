@@ -10,7 +10,7 @@ use Getopt::Long qw(:config bundling pass_through);
 use Data::Dumper;
 use v5.010;
 
-my $add = 0;
+my $VERSION = '0.1.0';
 
 sub usage {
   say <<EOB;
@@ -32,11 +32,12 @@ EOB
   exit 0;
 }
 
+my $add = 0;
 my @freeform;
 sub process {
   my $input = shift;
   if($input =~ /^[+-]/) {
-    $add = 0+$input;
+    $add = 0+$input unless $add;
   }
   else {
     push @freeform, $input if $input =~ /\d+/;
