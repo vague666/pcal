@@ -8,9 +8,12 @@ use Term::ANSIColor qw(colored);
 use DateTime;
 use Getopt::Long qw(:config bundling pass_through);
 use Data::Dumper;
+use utf8;
 use v5.010;
 
 my $VERSION = '0.1.0';
+
+binmode STDOUT, ":utf8";
 
 sub usage {
   say <<EOB;
@@ -48,6 +51,7 @@ sub make_table {
   my ($cal) = @_;
   my $mtb = Text::Table->new(
 	  { title => '', align_title => 'right' },
+	  { is_sep => 1, body => '│' },
 	  map +{ title => $_, align_title => 'right' },
 	  qw(Mo Tu We Th Fr Sa Su)
 	);
@@ -57,7 +61,7 @@ sub make_table {
   my $som = $cal->truncate(to => 'month');
   do {
     my $week = $som->week_number;
-    my @days = (colored($week, 'bold'), ('') x (($som->dow) - 1));
+    my @days = (colored(sprintf("%s%s", $week < 10 ? ' ' : '', $week), 'on_grey10'), ('') x (($som->dow) - 1));
     do {
       push @days, $som->doy == DateTime->now->doy ? colored($som->day, 'reverse') : $som->day;
       $som->add(days => 1);
