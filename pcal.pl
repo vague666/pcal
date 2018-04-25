@@ -24,7 +24,7 @@ sub usage {
 pcal (c)2018 Jari Matilainen
 
 Usage: $0 [+|-<#>|<#> [<#>]] [-m|--month <month>] [-y|--year <year>] [-B|--before <before>]
-          [-A|--after <after>] [-H|--holidays] [-v...v|--verbose] [-h|--help|--usage]
+          [-A|--after <after>] [-n|--hide_holidays] [-v...v|--verbose] [-h|--help|--usage]
 
 Details:
 	-|+<num>		Display month that is <num> months before/after the current one
@@ -33,7 +33,7 @@ Details:
 	-y|--year <year>	Display full <year> if -m not specified, otherwise display <month> of <year>
 	-B|--before <num>	Display <num> months before the current one
 	-A|--after <num>	Display <num> months after the current one
-	-H|--holidays           Mark Swedish holidays in red
+	-n|--hide_holidays      Hide Swedish holidays
 	-v|--verbose		Print more verbose output
 	-h|--help|--usage	Show this help
 
@@ -44,16 +44,16 @@ EOB
 my @freeform;
 my $add = 0;
 my $holidays;
-my ($month, $year, $before, $after, $show_holidays, $verbose);
+my ($month, $year, $before, $after, $hide_holidays, $verbose);
 my $options = GetOptions(
-  'month|m=i'    => \$month,
-  'year|y:i'     => \$year,
-  'before|B=i'   => \$before,
-  'after|A=i'    => \$after,
-  'holidays|H'   => \$show_holidays,
-  'verbose|v+'   => \$verbose,
-  'help|usage|h' => \&usage,
-  '<>'           => \&process
+  'month|m=i'       => \$month,
+  'year|y:i'        => \$year,
+  'before|B=i'      => \$before,
+  'after|A=i'       => \$after,
+  'hide_holidays|n' => \$hide_holidays,
+  'verbose|v+'      => \$verbose,
+  'help|usage|h'    => \&usage,
+  '<>'              => \&process
 );
 
 unless($options) {
@@ -66,7 +66,7 @@ eval {
   push @errors, "You can't use -A and -B when displaying a full-year calendar" if $dfy && ($after || $before);
   $before = $before ? abs($before) * -1 : 0;
   $after = $after ? abs($after) : $dfy ? 11 : 0;
-  $show_holidays = 0 unless $show_holidays;
+  $hide_holidays = 0 unless $hide_holidays;
 
   die join("\n", @errors) . "\n" if @errors;
 };
@@ -131,7 +131,7 @@ sub is_holiday {
     return 1;
   }
 
-  if($show_holidays) {
+  if(!$hide_holidays) {
     unless(exists $holidays->{$cal->year}) {
       $holidays->{$cal->year} = fetch_holidays($cal->year);
     }
