@@ -45,3 +45,13 @@ Details:
         -A|--after <num>        Display <num> months after the current one
         -h|--help|--usage       Show this help
 ```
+
+# PreReqs:
+```
+At least perl v5.10
+Text::Table
+DateTime
+Path::Tiny
+Mojolicious
+
+```
