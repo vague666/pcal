@@ -34,7 +34,7 @@ $ pcal
 # Usage
 ```
 Usage: pcal [+|-<#>|<#> [<#>]] [-m|--month <month>] [-y|--year <year>] [-B|--before <before>]
-            [-A|--after <after>] [-v...v|--verbose] [-h|--help|--usage]
+            [-A|--after <after>] [-n|--hide_holidays] [-v...v|--verbose] [-h|--help|--usage]
 
 Details:
         -|+<num>                Display month that is <num> months before/after the current one
@@ -43,10 +43,12 @@ Details:
         -y|--year <year>        Display full <year> if -m not specified, otherwise display <month> of <year>
         -B|--before <num>       Display <num> months before the current one
         -A|--after <num>        Display <num> months after the current one
+        -n|--hide_holidays      Hide Swedish holidays
+        -v|--verbose            Print more verbose output
         -h|--help|--usage       Show this help
 ```
 
-# PreReqs:
+# PreReqs
 ```
 At least perl v5.10
 Text::Table
