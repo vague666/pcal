@@ -2,7 +2,6 @@
 
 use strict;
 use warnings;
-use local::lib;
 use Text::Table;
 use Term::ANSIColor qw(colored);
 use DateTime;
