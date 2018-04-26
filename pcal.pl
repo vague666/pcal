@@ -11,11 +11,18 @@ use Mojo::UserAgent;
 use Data::Dumper;
 use Path::Tiny;
 use Mojo::JSON qw(decode_json encode_json);
+use Clone 'clone';
 use utf8;
 use v5.010;
 
 my $VERSION = '0.2.0';
 my $datafile;
+my $mtb = Text::Table->new(
+  { title => '', align_title => 'right' },
+  { is_sep => 1, body => '│' },
+  map +{ title => $_, align_title => 'right' },
+  qw(Mo Tu We Th Fr Sa Su)
+);
 
 binmode STDOUT, ":utf8";
 
@@ -146,12 +153,6 @@ sub is_holiday {
 
 sub make_table {
   my ($cal) = @_;
-  my $mtb = Text::Table->new(
-	  { title => '', align_title => 'right' },
-	  { is_sep => 1, body => '│' },
-	  map +{ title => $_, align_title => 'right' },
-	  qw(Mo Tu We Th Fr Sa Su)
-	);
   my @rows;
   my $t_year = $cal->year;
   my $t_month = $cal->month_name;
@@ -167,8 +168,9 @@ sub make_table {
     push @rows, [ @days ];
   } while $som->day != 1;
   
-  $mtb->load(@rows);
-  return { title => "$t_month $t_year", table => $mtb->stringify };
+  my $ttb = clone $mtb;
+  $ttb->load(@rows);
+  return { title => "$t_month $t_year", table => $ttb->stringify };
 }
 
 BEGIN {
