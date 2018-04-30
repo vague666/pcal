@@ -153,23 +153,37 @@ sub is_holiday {
 sub make_table {
   my ($cal) = @_;
   my @rows;
-  my $t_year = $cal->year;
-  my $t_month = $cal->month_name;
   my $som = $cal->truncate(to => 'month');
+  my $yearnumber = $som->year;
+  my $monthname = $som->month_name;
+  my $t_month = $som->month;
+  $som = $cal->truncate(to => 'week');
   do {
     my $week = $som->week_number;
-    my @days = (colored(sprintf("%s%s", $week < 10 ? ' ' : '', $week), 'on_grey10'), ('') x (($som->dow) - 1));
+    my @days = colored(sprintf("%s%s", $week < 10 ? ' ' : '', $week), 'on_grey10');
+
+    while($som->month != $t_month) {
+      push @days, colored($som->day, 'grey5');
+      $som->add(days => 1);
+    }
+
     do {
       my $cur = $som->doy == DateTime->now->doy && $cal->year == DateTime->now->year ? colored($som->day, 'reverse') : $som->day;
       push @days, is_holiday($som) ? colored($cur, 'bright_red') : $cur;
       $som->add(days => 1);
     } while $week == $som->week && $som->day != 1;
+
+    while($week == $som->week) {
+      push @days, colored($som->day, 'grey5');
+      $som->add(days => 1);
+    }
+
     push @rows, [ @days ];
-  } while $som->day != 1;
+  } while $som->month == $t_month;
   
   my $ttb = clone $mtb;
   $ttb->load(@rows);
-  return { title => "$t_month $t_year", table => $ttb->stringify };
+  return { title => "$monthname $yearnumber", table => $ttb->stringify };
 }
 
 BEGIN {
