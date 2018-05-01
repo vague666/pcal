@@ -39,7 +39,8 @@ Details:
 	-y|--year <year>	Display full <year> if -m not specified, otherwise display <month> of <year>
 	-B|--before <num>	Display <num> months before the current one
 	-A|--after <num>	Display <num> months after the current one
-	-n|--hide_holidays      Hide Swedish holidays
+	-H|--noholidays         Hide Swedish holidays
+	-F|--nofullweek		Hide display of full week at start and end of month 
 	-v|--verbose		Print more verbose output
 	-h|--help|--usage	Show this help
 
@@ -50,13 +51,14 @@ EOB
 my @freeform;
 my $add = 0;
 my $holidays;
-my ($month, $year, $before, $after, $hide_holidays, $verbose);
+my ($month, $year, $before, $after, $hide_holidays, $hide_fullweek, $verbose);
 my $options = GetOptions(
   'month|m=i'       => \$month,
   'year|y:i'        => \$year,
   'before|B=i'      => \$before,
   'after|A=i'       => \$after,
-  'hide_holidays|n' => \$hide_holidays,
+  'noholidays|H'    => \$hide_holidays,
+  'nofullweek|F'    => \$hide_fullweek,
   'verbose|v+'      => \$verbose,
   'help|usage|h'    => \&usage,
   '<>'              => \&process
@@ -117,7 +119,7 @@ for my $c (@calendars) {
 ##########################################################
 sub process {
   my $input = shift;
-  if($input =~ /^[+-]/) {
+  if($input =~ /^[+-]\d+/) {
     $add = 0+$input unless $add;
   }
   else {
@@ -157,14 +159,19 @@ sub make_table {
   my $yearnumber = $som->year;
   my $monthname = $som->month_name;
   my $t_month = $som->month;
-  $som = $cal->truncate(to => 'week');
+  $som = $cal->truncate(to => 'week') unless $hide_fullweek;
   do {
     my $week = $som->week_number;
     my @days = colored(sprintf("%s%s", $week < 10 ? ' ' : '', $week), 'on_grey10');
 
-    while($som->month != $t_month) {
-      push @days, colored($som->day, 'grey5');
-      $som->add(days => 1);
+    unless($hide_fullweek) {
+      while($som->month != $t_month) {
+        push @days, colored($som->day, 'grey5');
+        $som->add(days => 1);
+      }
+    }
+    else {
+      push @days, ('') x (($som->dow) - 1);
     }
 
     do {
@@ -173,9 +180,11 @@ sub make_table {
       $som->add(days => 1);
     } while $week == $som->week && $som->day != 1;
 
-    while($week == $som->week) {
-      push @days, colored($som->day, 'grey5');
-      $som->add(days => 1);
+    unless($hide_fullweek) {
+      while($week == $som->week) {
+        push @days, colored($som->day, 'grey5');
+        $som->add(days => 1);
+      }
     }
 
     push @rows, [ @days ];
