@@ -14,7 +14,7 @@ use Clone 'clone';
 use utf8;
 use v5.010;
 
-my $VERSION = '0.2.0';
+my $VERSION = '0.3.0';
 my $datafile;
 my $mtb = Text::Table->new(
   { title => '', align_title => 'right' },
