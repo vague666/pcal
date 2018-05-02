@@ -2,19 +2,18 @@
 
 use strict;
 use warnings;
-use Text::Table;
-use Term::ANSIColor qw(colored);
-use DateTime;
-use Getopt::Long qw(:config bundling pass_through);
-use Mojo::UserAgent;
-use Data::Dumper;
-use Path::Tiny;
-use Mojo::JSON qw(decode_json encode_json);
-use Clone 'clone';
 use utf8;
 use v5.010;
+use DateTime;
+use Path::Tiny;
+use Text::Table;
+use Clone 'clone';
+use Mojo::UserAgent;
+use Term::ANSIColor qw(colored);
+use Mojo::JSON qw(decode_json encode_json);
+use Getopt::Long qw(:config bundling pass_through);
 
-my $VERSION = '0.3.0';
+my $VERSION = '0.3.1';
 my $datafile;
 my $mtb = Text::Table->new(
   { title => '', align_title => 'right' },
@@ -160,6 +159,7 @@ sub make_table {
   my $monthname = $som->month_name;
   my $t_month = $som->month;
   $som = $cal->truncate(to => 'week') unless $hide_fullweek;
+
   do {
     my $week = $som->week_number;
     my @days = colored(sprintf("%s%s", $week < 10 ? ' ' : '', $week), 'on_grey10');
