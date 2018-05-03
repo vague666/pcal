@@ -5,16 +5,14 @@ use warnings;
 use utf8;
 use v5.010;
 use DateTime;
-use Path::Tiny;
+use Path::Tiny 'path';
 use Text::Table;
 use Clone 'clone';
-use Mojo::UserAgent;
 use Term::ANSIColor qw(colored);
-use Mojo::JSON qw(decode_json encode_json);
 use Getopt::Long qw(:config bundling pass_through);
 
-my $VERSION = '0.3.1';
-my $datafile;
+my $VERSION = '0.3.2';
+my $datafile = $ENV{HOME} . "/.config/pcal/pcal.dat";
 my $mtb = Text::Table->new(
   { title => '', align_title => 'right' },
   { is_sep => 1, body => '│' },
@@ -29,7 +27,8 @@ sub usage {
 pcal (c)2018 Jari Matilainen
 
 Usage: $0 [+|-<#>|<#> [<#>]] [-m|--month <month>] [-y|--year <year>] [-B|--before <before>]
-          [-A|--after <after>] [-n|--hide_holidays] [-v...v|--verbose] [-h|--help|--usage]
+          [-A|--after <after>] [-H|--noholidays] [-F|--nofullweek] [-C|--nocolors]
+          [-v...v|--verbose] [-h|--help|--usage]
 
 Details:
 	-|+<num>		Display month that is <num> months before/after the current one
@@ -40,6 +39,7 @@ Details:
 	-A|--after <num>	Display <num> months after the current one
 	-H|--noholidays         Hide Swedish holidays
 	-F|--nofullweek		Hide display of full week at start and end of month 
+	-C|--nocolors		Don't use colors
 	-v|--verbose		Print more verbose output
 	-h|--help|--usage	Show this help
 
@@ -50,7 +50,7 @@ EOB
 my @freeform;
 my $add = 0;
 my $holidays;
-my ($month, $year, $before, $after, $hide_holidays, $hide_fullweek, $verbose);
+my ($month, $year, $before, $after, $hide_holidays, $hide_fullweek, $hide_colors, $verbose);
 my $options = GetOptions(
   'month|m=i'       => \$month,
   'year|y:i'        => \$year,
@@ -58,6 +58,7 @@ my $options = GetOptions(
   'after|A=i'       => \$after,
   'noholidays|H'    => \$hide_holidays,
   'nofullweek|F'    => \$hide_fullweek,
+  'nocolors|C'      => \$hide_colors,
   'verbose|v+'      => \$verbose,
   'help|usage|h'    => \&usage,
   '<>'              => \&process
@@ -68,18 +69,13 @@ unless($options) {
 }
 
 my $dfy = defined $year && !$month;
-eval {
-  my @errors;
-  push @errors, "You can't use -A and -B when displaying a full-year calendar" if $dfy && ($after || $before);
-  $before = $before ? abs($before) * -1 : 0;
-  $after = $after ? abs($after) : $dfy ? 11 : 0;
-  $hide_holidays = 0 unless $hide_holidays;
+my @errors;
+push @errors, "You can't use -A and -B when displaying a full-year calendar" if $dfy && ($after || $before);
+$before = $before ? abs($before) * -1 : 0;
+$after = $after ? abs($after) : $dfy ? 11 : 0;
+$hide_holidays = 0 unless $hide_holidays;
 
-  die join("\n", @errors) . "\n" if @errors;
-};
-if($@) {
-  die $@ . "\n";
-}
+die join("\n", @errors) . "\n" if @errors;
 
 my $now = DateTime->today(time_zone => 'local');
 $month //= $freeform[0] // $now->month;
@@ -93,6 +89,8 @@ else {
   $now->set(year => $year);
   $now->add(months => $add) if $add;
 }
+
+init();
 
 my @calendars;
 for($before .. $after) {
@@ -129,6 +127,7 @@ sub process {
 sub fetch_holidays {
   my $year = shift;
   say "Fetching data for $year" if $verbose;
+  require Mojo::UserAgent;
   return [ Mojo::UserAgent->new->max_redirects(5)->get("https://www.kalender.se/helgdagar/$year")->result->dom('table.table.table-striped tbody tr td:last-child')->map('text')->each ];
 }
 
@@ -162,11 +161,12 @@ sub make_table {
 
   do {
     my $week = $som->week_number;
-    my @days = colored(sprintf("%s%s", $week < 10 ? ' ' : '', $week), 'on_grey10');
+    my $wstr = sprintf("%2s", $week);
+    my @days = $hide_colors ? $wstr : colored($wstr, 'on_grey10');
 
     unless($hide_fullweek) {
       while($som->month != $t_month) {
-        push @days, colored($som->day, 'grey5');
+        push @days, $hide_colors ? $som->day : colored($som->day, 'grey5');
         $som->add(days => 1);
       }
     }
@@ -175,14 +175,14 @@ sub make_table {
     }
 
     do {
-      my $cur = $som->doy == DateTime->now->doy && $cal->year == DateTime->now->year ? colored($som->day, 'reverse') : $som->day;
-      push @days, is_holiday($som) ? colored($cur, 'bright_red') : $cur;
+      my $cur = !$hide_colors && $som->doy == DateTime->now->doy && $cal->year == DateTime->now->year ? colored($som->day, 'reverse') : $som->day;
+      push @days, !$hide_colors && is_holiday($som) ? colored($cur, 'bright_red') : $cur;
       $som->add(days => 1);
     } while $week == $som->week && $som->day != 1;
 
     unless($hide_fullweek) {
       while($week == $som->week) {
-        push @days, colored($som->day, 'grey5');
+        push @days, $hide_colors ? $som->day : colored($som->day, 'grey5');
         $som->add(days => 1);
       }
     }
@@ -195,14 +195,28 @@ sub make_table {
   return { title => "$monthname $yearnumber", table => $ttb->stringify };
 }
 
-BEGIN {
-  $datafile = "~/.config/pcal/pcal.rc";
-  my $path = path($datafile);
-  if($path->exists) {
-    $holidays = decode_json($path->slurp);
+sub init {
+  if(!$hide_holidays && path($datafile)->exists) {
+    eval {
+      require File::Slurper;
+      File::Slurper->import(qw(write_binary read_binary));
+      require Sereal::Decoder;
+      Sereal::Decoder->import(qw(sereal_decode_with_object));
+      require Sereal::Encoder;
+      Sereal::Encoder->import(qw(sereal_encode_with_object));
+    };
+    die $@ if $@;
+
+    $holidays = sereal_decode_with_object(Sereal::Decoder->new, read_binary($datafile));
   }
 }
 
 END {
-  path($datafile)->touchpath->spew(encode_json($holidays));
+  unless($hide_holidays) {
+    my $path = path($datafile);
+    if(!$path->exists) {
+      $path->touchpath;
+    }
+    write_binary($datafile, sereal_encode_with_object(Sereal::Encoder->new, $holidays));
+  }
 }
