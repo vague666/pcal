@@ -44,7 +44,7 @@ Details:
 	-h|--help|--usage	Show this help
 
 EOB
-  exit 0;
+  exit(0);
 }
 
 my @freeform;
@@ -90,7 +90,7 @@ else {
   $now->add(months => $add) if $add;
 }
 
-init();
+begin();
 
 my @calendars;
 for($before .. $after) {
@@ -112,6 +112,8 @@ for my $c (@calendars) {
   $tb->add(map { $_->{table} } @$c);
   say $tb;
 }
+
+end();
 
 ##########################################################
 sub process {
@@ -195,7 +197,7 @@ sub make_table {
   return { title => "$monthname $yearnumber", table => $ttb->stringify };
 }
 
-sub init {
+sub begin {
   if(!$hide_holidays && path($datafile)->exists) {
     eval {
       require File::Slurper;
@@ -211,7 +213,7 @@ sub init {
   }
 }
 
-END {
+sub end {
   unless($hide_holidays) {
     my $path = path($datafile);
     if(!$path->exists) {
