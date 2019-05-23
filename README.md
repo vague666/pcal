@@ -30,6 +30,7 @@ $ pcal
 17 23 24 25 26 27 28 29
 18 30
 ```
+![All features visible][all_features] ![Public holidays hidden][hide_holidays] ![Full week at start and end of month not displayed][hide_full_week] ![Colors turned off][hide_colors]
 
 # Usage
 ```
@@ -57,3 +58,7 @@ Path::Tiny
 Mojolicious
 
 ```
+[all_features]: screenshots/all_features.png
+[hide_colors]: screenshots/hide_colors.png
+[hide_full_week]: screenshots/hide_full_week.png
+[hide_holidays]: screenshots/hide_public_holidays.png
