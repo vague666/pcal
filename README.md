@@ -30,9 +30,18 @@ $ pcal
 17 23 24 25 26 27 28 29
 18 30
 ```
-|            All features visible                   |            Public holidays hidden                 | Full week at start and end of month not displayed |              Colors turned off                    |
-| :-----------------------------------------------: | :-----------------------------------------------: | :-----------------------------------------------: | :-----------------------------------------------: |
-| ![All features visible][all_features]             | ![Public holidays hidden][hide_holidays]          | ![Full week not displayed][hide_full_week]        | ![Colors turned off][hide_colors]                 |
+All features visible
+![All features visible][all_features]
+
+Public holidays hidden
+![Public holidays hidden][hide_holidays]
+
+Full week at start and end of month not displayed
+![Full week not displayed][hide_full_week]
+
+Colors turned off
+![Colors turned off][hide_colors]
+
 
 # Usage
 ```
