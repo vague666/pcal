@@ -32,7 +32,7 @@ $ pcal
 ```
 | All features visible | Public holidays hidden | Full week at start and end of month not displayed | Colors turned off |
 | :------------------: | :--------------------: | :-----------------------------------------------: | :---------------: |
-| ![All features visible][all_features] | ![Public holidays hidden][hide_holidays] | ![Full week at start and end of month not displayed][hide_full_week] | ![Colors turned off][hide_colors] |
+| ![All features visible](screenshots/all_features.png) | ![Public holidays hidden][hide_holidays] | ![Full week at start and end of month not displayed][hide_full_week] | ![Colors turned off][hide_colors] |
 
 # Usage
 ```
