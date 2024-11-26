@@ -69,10 +69,16 @@ Details:
 # PreReqs
 ```
 At least perl v5.10
-Text::Table
+Clone
 DateTime
 Path::Tiny
-Mojolicious
+Text::Table
+
+Optional:
+Term::ANSIColor     # You need to disable colors with -C if module is not installed
+Mojolicious         # You need to disable display of holidays with -H if module is not installed
+Sereal::Encoder     # Same as above for the following two modules
+Sereal::Decoder     # 
 
 ```
 [all_features]: screenshots/all_features.png
